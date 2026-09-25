@@ -29,8 +29,9 @@ export function isValidEmail(email: string): boolean {
 export function isValidAmount(amount: unknown): boolean {
   if (typeof amount !== 'number') return false;
   if (!Number.isFinite(amount)) return false;
+  if (!Number.isInteger(amount)) return false;  // openapi.yaml: amount is an integer (cents)
   if (amount <= 0) return false;
-  if (amount > 10_000_00) return false;    // max $10,000.00 in cents
+  if (amount > 10_000_00) return false;         // business cap: $10,000.00 in cents
   return true;
 }
 
