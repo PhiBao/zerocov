@@ -1,0 +1,171 @@
+$ jest --coverage
+PASS tests/unit/utils/helpers.baseline.test.ts
+PASS tests/unit/auth/tokens.test.ts
+PASS tests/unit/utils/helpers.extended.test.ts
+PASS tests/integration/expense-approval-flow.test.ts
+PASS tests/unit/approvals/routes.test.ts
+PASS tests/unit/reports/routes.test.ts
+FAIL tests/unit/auth/middleware.test.ts
+  ● Console
+
+    console.error
+      [UnhandledError] JsonWebTokenError {
+        name: 'JsonWebTokenError',
+        message: 'jwt malformed'
+      }
+
+      at error (src/file:/home/kiter/bob/expense-flow-api/src/app.ts:38:13)
+      at Layer.handle_error (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:326:13)
+      at node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:326:13)
+      at node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:346:12)
+      at Immediate.next (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:280:10)
+      at Immediate._onImmediate (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:646:15)
+
+    console.error
+      [UnhandledError] JsonWebTokenError {
+        name: 'JsonWebTokenError',
+        message: 'invalid signature'
+      }
+
+      at error (src/file:/home/kiter/bob/expense-flow-api/src/app.ts:38:13)
+      at Layer.handle_error (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:326:13)
+      at node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:326:13)
+      at node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:346:12)
+      at Immediate.next (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:280:10)
+      at Immediate._onImmediate (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:646:15)
+
+    console.error
+      [UnhandledError] TokenExpiredError {
+        name: 'TokenExpiredError',
+        message: 'jwt expired',
+        expiredAt: 2026-09-25T20:58:27.000Z
+      }
+
+      at error (src/file:/home/kiter/bob/expense-flow-api/src/app.ts:38:13)
+      at Layer.handle_error (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:326:13)
+      at node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:326:13)
+      at node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:346:12)
+      at Immediate.next (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:280:10)
+      at Immediate._onImmediate (node_modules/.pnpm/express@4.22.3/node_modules/express/lib/router/index.js:646:15)
+
+  ● auth/middleware — authenticate() › returns 401 for a completely invalid token string
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 500
+
+      at Object.<anonymous> (tests/unit/auth/file:/home/kiter/bob/expense-flow-api/tests/unit/auth/middleware.test.ts:41:24)
+
+  ● auth/middleware — authenticate() › returns 401 for a token with a tampered signature
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 500
+
+      at Object.<anonymous> (tests/unit/auth/file:/home/kiter/bob/expense-flow-api/tests/unit/auth/middleware.test.ts:51:24)
+
+  ● auth/middleware — authenticate() › returns 401 (not 500) for an expired access token
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 500
+
+      at Object.<anonymous> (tests/unit/auth/file:/home/kiter/bob/expense-flow-api/tests/unit/auth/middleware.test.ts:68:24)
+
+FAIL tests/unit/expenses/routes.test.ts
+  ● POST /expenses › returns 400 for a non-integer amount
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 201
+
+      at Object.<anonymous> (tests/unit/expenses/file:/home/kiter/bob/expense-flow-api/tests/unit/expenses/routes.test.ts:106:24)
+
+  ● POST /expenses › returns 400 for an amount above the business limit
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 201
+
+      at Object.<anonymous> (tests/unit/expenses/file:/home/kiter/bob/expense-flow-api/tests/unit/expenses/routes.test.ts:114:24)
+
+  ● POST /expenses › returns 400 for a non-finite amount (raw JSON 1e999)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 201
+
+      at Object.<anonymous> (tests/unit/expenses/file:/home/kiter/bob/expense-flow-api/tests/unit/expenses/routes.test.ts:124:24)
+
+  ● PATCH /expenses/:id › returns 400 for a non-integer amount
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      at Object.<anonymous> (tests/unit/expenses/file:/home/kiter/bob/expense-flow-api/tests/unit/expenses/routes.test.ts:169:24)
+
+  ● PATCH /expenses/:id › returns 400 for a non-finite amount (raw JSON 1e999)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      at Object.<anonymous> (tests/unit/expenses/file:/home/kiter/bob/expense-flow-api/tests/unit/expenses/routes.test.ts:180:24)
+
+PASS tests/unit/auth/routes.test.ts (5.26 s)
+-----------------------------------------------------------------------|---------|----------|---------|---------|-------------------
+File                                                                   | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-----------------------------------------------------------------------|---------|----------|---------|---------|-------------------
+All files                                                              |   90.14 |    77.68 |   81.11 |   92.37 |                   
+ approvals/file:/home/kiter/bob/expense-flow-api/src/approvals         |   97.61 |    86.66 |     100 |     100 |                   
+  routes.ts                                                            |   97.61 |    86.66 |     100 |     100 | 18,54             
+ auth/file:/home/kiter/bob/expense-flow-api/src/auth                   |    95.6 |    73.33 |     100 |    95.6 |                   
+  middleware.ts                                                        |   90.47 |       80 |     100 |   90.47 | 45-46             
+  routes.ts                                                            |   96.15 |    86.66 |     100 |   96.15 | 72,91             
+  tokens.ts                                                            |     100 |       50 |     100 |     100 | 4-29              
+ expenses/file:/home/kiter/bob/expense-flow-api/src/expenses           |   87.83 |    70.58 |   85.71 |   93.54 |                   
+  routes.ts                                                            |   87.83 |    70.58 |   85.71 |   93.54 | 73,127-131        
+ file:/home/kiter/bob/expense-flow-api/src                             |   82.14 |    54.54 |   72.72 |   87.67 |                   
+  app.ts                                                               |    87.5 |        0 |      50 |    87.5 | 23,28,35          
+  db.ts                                                                |      80 |       60 |   75.86 |   87.75 | 41,72,96-99,115   
+ notifications/file:/home/kiter/bob/expense-flow-api/src/notifications |   26.66 |        0 |    12.5 |   26.66 |                   
+  service.ts                                                           |   26.66 |        0 |    12.5 |   26.66 | 22-28,39-58       
+ reports/file:/home/kiter/bob/expense-flow-api/src/reports             |     100 |      100 |     100 |     100 |                   
+  routes.ts                                                            |     100 |      100 |     100 |     100 |                   
+ utils/file:/home/kiter/bob/expense-flow-api/src/utils                 |     100 |      100 |     100 |     100 |                   
+  helpers.ts                                                           |     100 |      100 |     100 |     100 |                   
+-----------------------------------------------------------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 2 failed, 7 passed, 9 total
+Tests:       8 failed, 137 passed, 145 total
+Snapshots:   0 total
+Time:        5.89 s, estimated 7 s
+Ran all test suites.
+[ELIFECYCLE] Command failed with exit code 1.

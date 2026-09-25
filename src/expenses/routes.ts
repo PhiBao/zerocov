@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db';
 import { authenticate, requireRole } from '../auth/middleware';
-import { sendSuccess, sendError, generateId, isNonEmptyString, sanitizeString } from '../utils/helpers';
+import { sendSuccess, sendError, generateId, isNonEmptyString, sanitizeString, isValidAmount } from '../utils/helpers';
 import { CreateExpenseDTO, UpdateExpenseDTO, SubmitExpenseDTO, ExpenseCategory } from '../types';
 
 export const expensesRouter: Router = Router();
@@ -31,8 +31,8 @@ expensesRouter.get('/:id', authenticate, (req: Request, res: Response) => {
 expensesRouter.post('/', authenticate, (req: Request, res: Response) => {
   const { amount, category, description, receiptUrl }: CreateExpenseDTO = req.body;
 
-  if (typeof amount !== 'number' || amount <= 0) {
-    return sendError(res, 'Amount must be a positive number');
+  if (!isValidAmount(amount)) {
+    return sendError(res, 'Amount must be a positive integer in cents (max $10,000.00)');
   }
 
   if (!VALID_CATEGORIES.includes(category)) {
@@ -66,8 +66,8 @@ expensesRouter.patch('/:id', authenticate, (req: Request, res: Response) => {
 
   const updates: UpdateExpenseDTO = req.body;
 
-  if (updates.amount !== undefined && (typeof updates.amount !== 'number' || updates.amount <= 0)) {
-    return sendError(res, 'Amount must be a positive number');
+  if (updates.amount !== undefined && !isValidAmount(updates.amount)) {
+    return sendError(res, 'Amount must be a positive integer in cents (max $10,000.00)');
   }
   if (updates.category !== undefined && !VALID_CATEGORIES.includes(updates.category)) {
     return sendError(res, 'Invalid category');
