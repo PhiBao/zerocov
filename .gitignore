@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-test/
+coverage/
+.env
+*.log
+_*.sh
+
+# local dev convenience wrapper
+run.sh
