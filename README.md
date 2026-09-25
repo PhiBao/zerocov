@@ -103,6 +103,9 @@ Bob task session summary screenshots required by the hackathon live in
 [`bob_sessions/`](bob_sessions/). See that folder's README for naming conventions and
 what each screenshot shows.
 
+The full session diff — 131 new tests, the two source fixes, and the reports — is
+[PR #1](https://github.com/PhiBao/zerocov/pull/1) (merged into `main`).
+
 ## Project structure
 
 ```
