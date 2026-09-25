@@ -14,7 +14,10 @@ declare global {
 
 /**
  * authenticate — verifies the Bearer token in the Authorization header.
- * Delegates signature and expiry validation to verifyAccessToken().
+ *
+ * Every verification failure — missing header, malformed header, invalid
+ * signature, malformed token, expired token — responds with 401, as required
+ * by openapi.yaml and docs/auth-security-requirements.md (EXP-TOKEN-401).
  */
 export function authenticate(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
@@ -30,8 +33,8 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
     const payload = verifyAccessToken(token);
     req.user = payload;
     next();
-  } catch (err) {
-    throw err;
+  } catch {
+    res.status(401).json({ success: false, error: 'Invalid or expired token' });
   }
 }
 
