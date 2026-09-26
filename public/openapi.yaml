@@ -1,0 +1,524 @@
+openapi: "3.0.3"
+info:
+  title: ExpenseFlow API
+  version: "1.0.0"
+  description: |
+    REST API for expense tracking and approval workflows.
+    Employees submit expenses, managers approve/reject them, admins generate reports.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ApiSuccess:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          description: Response payload (varies by endpoint)
+
+    ApiError:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Invalid credentials"
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+        role: { type: string, enum: [employee, manager, admin] }
+
+    AuthTokens:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn: { type: integer, description: "Seconds until accessToken expires" }
+
+    Expense:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        amount: { type: integer, description: "Amount in cents, must be > 0" }
+        category:
+          type: string
+          enum: [travel, meals, accommodation, equipment, software, training, other]
+        description: { type: string }
+        receiptUrl: { type: string, format: uri, nullable: true }
+        status:
+          type: string
+          enum: [draft, submitted, approved, rejected, paid]
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    ApprovalRequest:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        expenseId: { type: string, format: uuid }
+        requesterId: { type: string, format: uuid }
+        approverId: { type: string, format: uuid }
+        status: { type: string, enum: [pending, approved, rejected] }
+        comment: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        resolvedAt: { type: string, format: date-time, nullable: true }
+
+    Report:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        dateFrom: { type: string, format: date-time }
+        dateTo: { type: string, format: date-time }
+        generatedAt: { type: string, format: date-time }
+        format: { type: string, enum: [json, csv] }
+        expenses:
+          type: array
+          items: { $ref: '#/components/schemas/Expense' }
+        totalAmount: { type: integer, description: "Total in cents" }
+        expenseCount: { type: integer }
+
+  responses:
+    Unauthorized:
+      description: |
+        Authentication failed. This is returned when:
+        - The Authorization header is missing
+        - The Authorization header is malformed (not Bearer)
+        - The JWT token has an invalid signature
+        - **The JWT token has expired** (TokenExpiredError MUST return 401, not 500)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+          example:
+            success: false
+            error: "Missing or malformed Authorization header"
+
+    Forbidden:
+      description: Authenticated but insufficient role permissions
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+          example:
+            success: false
+            error: "Insufficient permissions"
+
+    NotFound:
+      description: Requested resource does not exist
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+
+    UnprocessableEntity:
+      description: Request is valid but cannot be processed due to business rule violation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                name: { type: string }
+                role: { type: string, enum: [employee, manager, admin], default: employee }
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccess'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user: { $ref: '#/components/schemas/User' }
+                          tokens: { $ref: '#/components/schemas/AuthTokens' }
+        "400":
+          description: Validation error (invalid email, short password, missing name)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Login with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccess'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user: { $ref: '#/components/schemas/User' }
+                          tokens: { $ref: '#/components/schemas/AuthTokens' }
+        "401":
+          description: Invalid credentials (wrong password or unknown email)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: Refresh access token using a refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        "200":
+          description: New access token issued
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Logout (invalidates session)
+      responses:
+        "200":
+          description: Logged out successfully
+        "401": { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Get the currently authenticated user's profile
+      responses:
+        "200":
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccess'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/User' }
+        "401": { $ref: '#/components/responses/Unauthorized' }
+
+  /expenses:
+    get:
+      tags: [expenses]
+      summary: List expenses for the authenticated user
+      responses:
+        "200":
+          description: List of expenses
+        "401": { $ref: '#/components/responses/Unauthorized' }
+
+    post:
+      tags: [expenses]
+      summary: Create a new expense (starts in draft state)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, category, description]
+              properties:
+                amount:
+                  type: integer
+                  description: Amount in cents. Must be a positive integer > 0.
+                  minimum: 1
+                category:
+                  type: string
+                  enum: [travel, meals, accommodation, equipment, software, training, other]
+                description: { type: string }
+                receiptUrl: { type: string, format: uri }
+      responses:
+        "201":
+          description: Expense created
+        "400":
+          description: Validation error (invalid amount, category, or missing description)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        "401": { $ref: '#/components/responses/Unauthorized' }
+
+  /expenses/{id}:
+    get:
+      tags: [expenses]
+      summary: Get a specific expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Expense found
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+    patch:
+      tags: [expenses]
+      summary: Update a draft expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: integer, minimum: 1 }
+                category: { type: string }
+                description: { type: string }
+                receiptUrl: { type: string }
+      responses:
+        "200":
+          description: Expense updated
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "422": { $ref: '#/components/responses/UnprocessableEntity' }
+
+    delete:
+      tags: [expenses]
+      summary: Delete a draft expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Expense deleted
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "422": { $ref: '#/components/responses/UnprocessableEntity' }
+
+  /expenses/{id}/submit:
+    post:
+      tags: [expenses]
+      summary: Submit a draft expense for approval
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approverId]
+              properties:
+                approverId: { type: string, format: uuid }
+      responses:
+        "201":
+          description: Expense submitted; approval request created
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "422": { $ref: '#/components/responses/UnprocessableEntity' }
+
+  /approvals:
+    get:
+      tags: [approvals]
+      summary: List approval requests assigned to the authenticated manager/admin
+      responses:
+        "200":
+          description: List of approval requests
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+
+  /approvals/pending:
+    get:
+      tags: [approvals]
+      summary: List only pending approval requests for the authenticated manager
+      responses:
+        "200":
+          description: List of pending approvals
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+
+  /approvals/{id}:
+    get:
+      tags: [approvals]
+      summary: Get a specific approval request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Approval request details
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /approvals/{id}/resolve:
+    post:
+      tags: [approvals]
+      summary: Approve or reject an expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [approved, rejected] }
+                comment: { type: string, nullable: true }
+      responses:
+        "200":
+          description: Approval resolved; expense status updated
+        "400":
+          description: Invalid status value
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "422":
+          description: Approval already resolved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /reports:
+    get:
+      tags: [reports]
+      summary: List reports generated by the authenticated user
+      responses:
+        "200":
+          description: List of reports
+        "401": { $ref: '#/components/responses/Unauthorized' }
+
+    post:
+      tags: [reports]
+      summary: Generate a new expense report for a date range
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dateFrom, dateTo]
+              properties:
+                dateFrom: { type: string, format: date, example: "2024-01-01" }
+                dateTo: { type: string, format: date, example: "2024-01-31" }
+                categories:
+                  type: array
+                  items: { type: string, enum: [travel, meals, accommodation, equipment, software, training, other] }
+                format: { type: string, enum: [json, csv], default: json }
+      responses:
+        "201":
+          description: Report generated
+        "400":
+          description: Validation error (invalid dates, invalid categories)
+        "401": { $ref: '#/components/responses/Unauthorized' }
+
+  /reports/{id}:
+    get:
+      tags: [reports]
+      summary: Get a specific report
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Report details
+        "401": { $ref: '#/components/responses/Unauthorized' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /health:
+    get:
+      tags: [system]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  timestamp: { type: string, format: date-time }

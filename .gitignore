@@ -8,3 +8,7 @@ _*.sh
 
 # local dev convenience wrapper
 run.sh
+
+# vercel
+.vercel
+.env.local

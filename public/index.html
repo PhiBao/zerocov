@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZeroCov — live ExpenseFlow API demo</title>
+<meta name="description" content="ZeroCov: spec-driven test coverage workflow on IBM Bob 2.0. Live ExpenseFlow API demo, architecture, and results.">
+<style>
+:root{
+  --bg:#080b12; --panel:#101828; --line:#22304a; --text:#e9eef9; --muted:#93a4bf; --dim:#6b7c99;
+  --accent:#4c8dff; --accent2:#8b5cff; --green:#3fb950; --red:#f85149; --amber:#f0a43e;
+  --mono:'Ubuntu Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:'Ubuntu Sans','Ubuntu',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.5}
+a{color:#9fc2ff}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+header{position:sticky;top:0;z-index:20;background:rgba(8,11,18,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{font-weight:800;letter-spacing:-.02em;font-size:22px}
+.brand span{color:var(--accent)}
+.nav-links{display:flex;gap:22px;font-size:15px}
+.nav-links a{color:var(--muted);text-decoration:none}
+.nav-links a:hover{color:var(--text)}
+section{padding:72px 0;border-bottom:1px solid rgba(34,48,74,.5)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.eyebrow::before{content:"";width:26px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+h1{font-size:clamp(48px,7vw,84px);line-height:1.02;letter-spacing:-.03em;font-weight:800}
+h2{font-size:clamp(28px,3.4vw,40px);line-height:1.1;letter-spacing:-.02em;margin-bottom:14px}
+h3{font-size:20px;margin-bottom:10px}
+.lead{font-size:19px;color:var(--muted);max-width:860px}
+.grad{background:linear-gradient(92deg,#f2f6ff 10%,#a7c7ff 55%,#bda4ff 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.badge{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  border:1px solid rgba(76,141,255,.4);background:rgba(76,141,255,.12);color:#cfe0ff;padding:7px 12px;border-radius:999px}
+.badge.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+.metric{background:linear-gradient(180deg,rgba(21,31,51,.9),rgba(13,20,34,.9));border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+.metric .n{font-family:var(--mono);font-size:42px;font-weight:700;line-height:1}
+.metric .l{color:var(--muted);font-size:14px;margin-top:8px}
+.green{color:var(--green)} .amber{color:var(--amber)} .red{color:var(--red)} .blue{color:#8fb8ff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.card{background:linear-gradient(180deg,rgba(20,30,50,.9),rgba(14,21,36,.9));border:1px solid var(--line);border-radius:16px;padding:24px}
+.card p{color:var(--muted);font-size:15.5px}
+.btn{font-family:var(--sans);font-size:14.5px;font-weight:600;color:#dbe7ff;background:rgba(76,141,255,.14);
+  border:1px solid rgba(76,141,255,.45);border-radius:10px;padding:10px 14px;cursor:pointer;transition:.15s}
+.btn:hover{background:rgba(76,141,255,.24);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(92deg,#3f7dfa,#7c5cff);border:0;color:#fff}
+.btn:disabled{opacity:.55;cursor:progress;transform:none}
+.console{display:grid;grid-template-columns:340px 1fr;gap:22px;margin-top:26px}
+.controls{display:flex;flex-direction:column;gap:12px}
+.term{background:#0a1120;border:1px solid var(--line);border-radius:14px;overflow:hidden;min-height:460px;display:flex;flex-direction:column}
+.term-bar{height:40px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#0e1626;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--dim)}
+.dot{width:11px;height:11px;border-radius:50%}
+.term pre{margin:0;padding:16px;font-family:var(--mono);font-size:13px;line-height:1.5;color:#c6d3e8;overflow:auto;flex:1;white-space:pre-wrap;word-break:break-word}
+.status{display:inline-block;font-family:var(--mono);font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;margin-right:8px}
+.s2{background:rgba(63,185,80,.16);color:#7ee2a8;border:1px solid rgba(63,185,80,.45)}
+.s4{background:rgba(240,164,62,.16);color:#ffd479;border:1px solid rgba(240,164,62,.45)}
+.s5{background:rgba(248,81,73,.16);color:#ff8a80;border:1px solid rgba(248,81,73,.45)}
+.mermaid{background:rgba(13,20,34,.6);border:1px solid var(--line);border-radius:16px;padding:18px;overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(34,48,74,.7);vertical-align:top}
+th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+td code{font-family:var(--mono);font-size:13.5px;color:#cfe0ff}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.pub{border-color:rgba(63,185,80,.4);color:#7ee2a8}
+.pill.auth{border-color:rgba(240,164,62,.4);color:#ffd479}
+.pill.role{border-color:rgba(139,92,255,.45);color:#cdb8ff}
+.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.links a{display:inline-flex;gap:8px;align-items:center;text-decoration:none;font-weight:600;font-size:14.5px;
+  background:rgba(76,141,255,.1);border:1px solid rgba(76,141,255,.35);color:#cfe0ff;padding:9px 14px;border-radius:10px}
+.links a:hover{background:rgba(76,141,255,.2)}
+.note{font-size:14px;color:var(--dim);border-left:3px solid var(--accent);background:rgba(76,141,255,.07);padding:12px 16px;border-radius:0 10px 10px 0;margin-top:22px}
+code{font-family:var(--mono)}
+footer{padding:34px 0;color:var(--dim);font-size:14px}
+@media (max-width:900px){.metrics,.grid2,.console{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand">Zero<span>Cov</span></div>
+    <nav class="nav-links">
+      <a href="#demo">Live demo</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#api">API</a>
+      <a href="#results">Results</a>
+      <a href="https://github.com/PhiBao/zerocov" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section>
+  <div class="wrap">
+    <div class="badges">
+      <span class="badge live">Live API · Vercel</span>
+      <span class="badge">IBM Bob 2.0 Hackathon</span>
+      <span class="badge">Developer workflow: testing</span>
+    </div>
+    <h1 class="grad">ZeroCov</h1>
+    <p class="lead" style="margin-top:18px">From test debt to production-ready in one IBM Bob 2.0 session. This page is served by the <b style="color:var(--text)">real ExpenseFlow API</b> — the same Express app that the spec-driven test suite exercises. Every number below is reproducible from the repository.</p>
+    <div class="metrics">
+      <div class="metric"><div class="n green">89.46%</div><div class="l">statement coverage · up from 22.77%</div></div>
+      <div class="metric"><div class="n blue">145</div><div class="l">tests · 9 suites · 131 added in one session</div></div>
+      <div class="metric"><div class="n amber">2</div><div class="l">spec divergences detected &amp; fixed</div></div>
+    </div>
+    <div class="links">
+      <a href="https://github.com/PhiBao/zerocov" target="_blank" rel="noopener">Repository</a>
+      <a href="https://github.com/PhiBao/zerocov/pull/1" target="_blank" rel="noopener">Session PR #1</a>
+      <a href="https://youtu.be/j0DtnV5fY9o" target="_blank" rel="noopener">Demo video (2:53)</a>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section id="demo">
+  <div class="wrap">
+    <div class="eyebrow">Try it live</div>
+    <h2>Call the deployed API</h2>
+    <p class="lead">These buttons hit this deployment directly (same origin, <code>/api</code> prefix). “Full workflow” runs register → create → submit → approve → report through real HTTP routes and checks each response against the documented status codes, including the expired-token fix.</p>
+    <div class="console">
+      <div class="controls">
+        <button class="btn primary" id="btn-flow">▶ Run full workflow</button>
+        <button class="btn" id="btn-health">GET /health</button>
+        <button class="btn" id="btn-expired">Expired token → expect 401</button>
+        <button class="btn" id="btn-noauth">No token → expect 401</button>
+        <button class="btn" id="btn-openapi">Fetch /openapi.yaml (first 40 lines)</button>
+        <div class="note" style="margin-top:6px">In-memory database, no signup. Each workflow run creates fresh demo users. On Vercel the API is serverless, so the flow endpoint performs the whole sequence inside one invocation.</div>
+      </div>
+      <div class="term">
+        <div class="term-bar">
+          <span class="dot" style="background:#f85149"></span>
+          <span class="dot" style="background:#f0a43e"></span>
+          <span class="dot" style="background:#3fb950"></span>
+          <span id="term-title" style="margin-left:8px">response</span>
+        </div>
+        <pre id="console-out">// Pick an action on the left.
+//
+// Suggested order:
+//   1. GET /health
+//   2. Run full workflow
+//   3. Expired token → expect 401</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="eyebrow">Architecture</div>
+    <h2>How the API is put together</h2>
+    <p class="lead">A small, production-shaped Express service: stateless JWT auth, role guards, four resource routers over an in-memory repository, and a global error handler. The specifications in <code>openapi.yaml</code> and <code>docs/</code> are the source of truth for behavior.</p>
+
+    <div class="grid2" style="margin-top:30px">
+      <div>
+        <h3>System overview</h3>
+        <div class="mermaid">
+flowchart LR
+  B["Browser / API consumer"] -->|"HTTP JSON"| J["express.json"]
+  subgraph APP["Express app — createApp()"]
+    direction TB
+    J --> AU["authenticate — Bearer JWT"]
+    AU --> RO["requireRole"]
+    RO --> R["auth · expenses · approvals · reports routers"]
+    R --> EH["global error handler"]
+  end
+  R --> DB[("InMemoryDatabase<br/>src/db.ts")]
+  R --> TK["tokens.ts — JWT sign/verify"]
+  R --> N["NotificationService — mocked"]
+  EH -->|"500 for unexpected errors"| B
+        </div>
+      </div>
+      <div>
+        <h3>Approval state machine</h3>
+        <div class="mermaid">
+stateDiagram-v2
+  [*] --> draft
+  draft --> submitted: POST /expenses/:id/submit
+  submitted --> approved: POST /approvals/:id/resolve approved
+  submitted --> rejected: POST /approvals/:id/resolve rejected
+  approved --> paid: admin action (not implemented)
+  draft --> [*]: DELETE
+  note right of submitted
+    Resolved once: a second resolve
+    returns 422. Non-draft edits
+    return 422.
+  end note
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:34px">Request lifecycle — submit and approve</h3>
+    <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant E as Employee
+  participant API as Express API
+  participant DB as InMemoryDatabase
+  participant M as Manager
+  E->>API: POST /expenses (draft)
+  API->>DB: createExpense
+  E->>API: POST /expenses/:id/submit {approverId}
+  API->>DB: updateExpense(submitted) + createApproval(pending)
+  API-->>M: notification (mocked)
+  M->>API: POST /approvals/:id/resolve {status: approved}
+  API->>DB: updateApproval(approved) + updateExpense(approved)
+  E->>API: POST /reports {dateFrom, dateTo}
+  API->>DB: approved/paid expenses in range
+  API-->>E: totals + expenses
+    </div>
+
+    <h3 style="margin-top:34px">Auth model</h3>
+    <div class="grid2">
+      <div class="card">
+        <h3>JWT bearer tokens</h3>
+        <p>Access tokens (15m) and refresh tokens (7d) are HS256-signed from <code>JWT_SECRET</code> / <code>JWT_REFRESH_SECRET</code>. Every authenticated route goes through <code>authenticate()</code>, which returns <b>401</b> for missing, malformed, invalid, or expired tokens — the <code>EXP-TOKEN-401</code> requirement.</p>
+      </div>
+      <div class="card">
+        <h3>Roles</h3>
+        <p><span class="pill role">employee</span> creates and submits own expenses, reads own reports. <span class="pill role">manager</span> resolves assigned approvals and reads team expenses/reports. <span class="pill role">admin</span> can act on all approvals and lists.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section id="api">
+  <div class="wrap">
+    <div class="eyebrow">API reference</div>
+    <h2>Endpoints</h2>
+    <p class="lead">All responses use the envelope <code>{ success, data?, error? }</code>. Full contract: <a href="/openapi.yaml">openapi.yaml</a> (rendered below with Redoc).</p>
+    <div style="overflow:auto;margin-top:24px">
+      <table>
+        <tr><th>Method &amp; path</th><th>Access</th><th>Success</th><th>Errors</th></tr>
+        <tr><td><code>POST /auth/register</code></td><td><span class="pill pub">public</span></td><td>201</td><td>400 invalid email/password/name · 409 duplicate email</td></tr>
+        <tr><td><code>POST /auth/login</code></td><td><span class="pill pub">public</span></td><td>200</td><td>400 missing fields · 401 invalid credentials (no user enumeration)</td></tr>
+        <tr><td><code>POST /auth/refresh</code></td><td><span class="pill pub">public</span></td><td>200</td><td>400 missing token · 401 invalid/expired refresh token</td></tr>
+        <tr><td><code>POST /auth/logout</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>401</td></tr>
+        <tr><td><code>GET /auth/me</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>401 invalid/expired · 404 user gone</td></tr>
+        <tr><td><code>GET /expenses</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>401</td></tr>
+        <tr><td><code>POST /expenses</code></td><td><span class="pill auth">bearer</span></td><td>201</td><td>400 invalid amount/category/description · 401</td></tr>
+        <tr><td><code>GET /expenses/:id</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>401 · 403 not yours (employee) · 404</td></tr>
+        <tr><td><code>PATCH /expenses/:id</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>400 · 401 · 403 · 404 · 422 not draft</td></tr>
+        <tr><td><code>DELETE /expenses/:id</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>401 · 403 · 404 · 422 not draft</td></tr>
+        <tr><td><code>POST /expenses/:id/submit</code></td><td><span class="pill auth">bearer</span></td><td>201</td><td>400 · 401 · 403 · 404 approver · 422 bad approver role / not draft</td></tr>
+        <tr><td><code>GET /approvals</code></td><td><span class="pill auth">bearer</span> <span class="pill role">manager/admin</span></td><td>200</td><td>401 · 403</td></tr>
+        <tr><td><code>GET /approvals/pending</code></td><td><span class="pill auth">bearer</span> <span class="pill role">manager/admin</span></td><td>200</td><td>401 · 403</td></tr>
+        <tr><td><code>GET /approvals/:id</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>401 · 403 · 404</td></tr>
+        <tr><td><code>POST /approvals/:id/resolve</code></td><td><span class="pill auth">bearer</span> <span class="pill role">manager/admin</span></td><td>200</td><td>400 bad status · 401 · 403 not assignee · 404 · 422 already resolved</td></tr>
+        <tr><td><code>GET /reports</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>401</td></tr>
+        <tr><td><code>POST /reports</code></td><td><span class="pill auth">bearer</span></td><td>201 (JSON) / 200 (CSV)</td><td>400 bad dates/categories · 401</td></tr>
+        <tr><td><code>GET /reports/:id</code></td><td><span class="pill auth">bearer</span></td><td>200</td><td>401 · 403 · 404</td></tr>
+      </table>
+    </div>
+    <div style="margin-top:34px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--line)">
+      <redoc spec-url="/openapi.yaml"></redoc>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="wrap">
+    <div class="eyebrow">Measured impact</div>
+    <h2>22.77% → 89.46% in one Bob session</h2>
+    <div class="grid2" style="margin-top:26px">
+      <div class="card">
+        <h3>Coverage</h3>
+        <table>
+          <tr><th>Metric</th><th>Baseline</th><th>After</th></tr>
+          <tr><td>Statements</td><td><code>22.77%</code></td><td><code class="green">89.46%</code></td></tr>
+          <tr><td>Lines</td><td><code>25.36%</code></td><td><code class="green">91.57%</code></td></tr>
+          <tr><td>Branches</td><td><code>5.00%</code></td><td><code class="green">77.31%</code></td></tr>
+          <tr><td>Tests</td><td><code>14</code></td><td><code class="green">145</code></td></tr>
+          <tr><td>Suites</td><td><code>1</code></td><td><code class="green">9</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Spec divergences found and fixed</h3>
+        <p><b>1 · Token handling.</b> Invalid, tampered, and expired JWTs returned <code>500</code> because the middleware re-threw every JWT error. <code>EXP-TOKEN-401</code> and <code>openapi.yaml</code> require <code>401</code>. Fixed in <code>src/auth/middleware.ts</code>; 3 tests fail before the fix.</p>
+        <p style="margin-top:12px"><b>2 · Amount validation.</b> <code>POST/PATCH /expenses</code> bypassed the shared validator, accepting non-integer, non-finite (<code>1e999</code> → Infinity), and above-cap amounts. <code>openapi.yaml</code> declares <code>amount: integer, minimum 1</code>. Fixed via <code>isValidAmount()</code>; 5 tests fail before the fix.</p>
+        <p style="margin-top:12px">No assertion was weakened to make a test pass — a project rule enforces this.</p>
+      </div>
+    </div>
+    <div class="links">
+      <a href="https://github.com/PhiBao/zerocov/blob/main/docs/coverage-before.txt" target="_blank" rel="noopener">coverage-before.txt</a>
+      <a href="https://github.com/PhiBao/zerocov/blob/main/docs/red-state-failures.txt" target="_blank" rel="noopener">red-state-failures.txt</a>
+      <a href="https://github.com/PhiBao/zerocov/blob/main/docs/coverage-after.txt" target="_blank" rel="noopener">coverage-after.txt</a>
+      <a href="https://github.com/PhiBao/zerocov/blob/main/COVERAGE-REPORT.md" target="_blank" rel="noopener">COVERAGE-REPORT.md</a>
+    </div>
+    <div class="note">ExpenseFlow is a synthetic fixture: the two divergences were seeded deliberately so the workflow is reproducible end to end. The deliverable is the workflow — the defects exist to prove it works. Baseline: <code>git checkout zerocov-baseline &amp;&amp; pnpm test:coverage</code> · After: <code>git checkout main &amp;&amp; pnpm test:coverage</code>.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    ZeroCov · ExpenseFlow API — IBM Bob 2.0 Hackathon ·
+    <a href="https://github.com/PhiBao/zerocov">github.com/PhiBao/zerocov</a>
+  </div>
+</footer>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { fontFamily: 'Ubuntu Sans, sans-serif' } });
+</script>
+<script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+<script>
+(function () {
+  const out = document.getElementById('console-out');
+  const title = document.getElementById('term-title');
+
+  function show(text) { out.textContent = text; }
+
+  function statusClass(code) {
+    if (code >= 500) return 's5';
+    if (code >= 400) return 's4';
+    return 's2';
+  }
+
+  function render(titleText, entries) {
+    title.textContent = titleText;
+    const parts = entries.map(function (e) {
+      const head = (e.code !== undefined
+        ? '<span class="status ' + statusClass(e.code) + '">' + e.code + '</span>'
+        : '') + e.label + (e.ms !== undefined ? '   (' + e.ms + ' ms)' : '');
+      return head + '\n' + (typeof e.body === 'string' ? e.body : JSON.stringify(e.body, null, 2));
+    });
+    out.innerHTML = parts.join('\n\n────────────────────────────────────────\n\n');
+  }
+
+  async function req(method, path, body, token) {
+    const t0 = performance.now();
+    const res = await fetch(path, {
+      method: method,
+      headers: Object.assign({ 'content-type': 'application/json' }, token ? { authorization: 'Bearer ' + token } : {}),
+      body: body === undefined ? undefined : JSON.stringify(body)
+    });
+    const text = await res.text();
+    let parsed;
+    try { parsed = JSON.parse(text); } catch (e) { parsed = text; }
+    return { code: res.status, ms: Math.round(performance.now() - t0), body: parsed };
+  }
+
+  function busy(btn, fn) {
+    return async function () {
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '… running';
+      try { await fn(); }
+      catch (err) { render('error', [{ label: 'Request failed', body: String(err) }]); }
+      finally { btn.disabled = false; btn.textContent = original; }
+    };
+  }
+
+  document.getElementById('btn-health').addEventListener('click', busy(document.getElementById('btn-health'), async function () {
+    const r = await req('GET', '/api/health');
+    render('GET /health', [{ label: 'GET /health', code: r.code, ms: r.ms, body: r.body }]);
+  }));
+
+  document.getElementById('btn-flow').addEventListener('click', busy(document.getElementById('btn-flow'), async function () {
+    const r = await req('POST', '/api/demo/flow');
+    if (r.body && r.body.steps) {
+      const entries = r.body.steps.map(function (s) {
+        return {
+          label: s.step + '  →  ' + s.method + ' ' + s.path + '   expected ' + s.expect + (s.pass ? '  ✓' : '  ✗'),
+          code: s.status,
+          ms: s.ms,
+          body: s.body
+        };
+      });
+      entries.unshift({ label: r.body.summary + '   —   ' + r.body.flow, body: 'HTTP ' + r.code + ' · ' + r.ms + ' ms total' });
+      render('POST /demo/flow', entries);
+    } else {
+      render('POST /demo/flow', [{ label: 'POST /demo/flow', code: r.code, ms: r.ms, body: r.body }]);
+    }
+  }));
+
+  document.getElementById('btn-expired').addEventListener('click', busy(document.getElementById('btn-expired'), async function () {
+    const minted = await req('GET', '/api/demo/expired-token');
+    const token = minted.body && minted.body.token;
+    const r = await req('GET', '/api/auth/me', undefined, token);
+    render('expired token → 401', [
+      { label: 'GET /demo/expired-token (server mints a token with expiresIn: -1)', code: minted.code, ms: minted.ms, body: minted.body },
+      { label: 'GET /auth/me with the expired token', code: r.code, ms: r.ms, body: r.body }
+    ]);
+  }));
+
+  document.getElementById('btn-noauth').addEventListener('click', busy(document.getElementById('btn-noauth'), async function () {
+    const r = await req('GET', '/api/expenses');
+    render('no token → 401', [{ label: 'GET /expenses with no Authorization header', code: r.code, ms: r.ms, body: r.body }]);
+  }));
+
+  document.getElementById('btn-openapi').addEventListener('click', busy(document.getElementById('btn-openapi'), async function () {
+    const t0 = performance.now();
+    const res = await fetch('/openapi.yaml');
+    const text = await res.text();
+    const lines = text.split('\n');
+    render('GET /openapi.yaml', [{
+      label: 'GET /openapi.yaml — ' + lines.length + ' lines total',
+      code: res.status,
+      ms: Math.round(performance.now() - t0),
+      body: lines.slice(0, 40).join('\n') + '\n…'
+    }]);
+  }));
+})();
+</script>
+</body>
+</html>

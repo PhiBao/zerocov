@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "node",
+  "buildCommand": "cp openapi.yaml public/openapi.yaml",
+  "functions": { "server.ts": { "includeFiles": "public/**" } }
+}
