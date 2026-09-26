@@ -22,6 +22,20 @@ expired-token check return 401, and browse the rendered OpenAPI reference.
 **Demo video:** [youtu.be/j0DtnV5fY9o](https://youtu.be/j0DtnV5fY9o) (2:53) — narrated
 walkthrough with real terminal recordings of the baseline, red, and green states.
 
+### Verify in 60 seconds
+
+```bash
+git clone https://github.com/PhiBao/zerocov && cd zerocov && pnpm install
+git checkout zerocov-baseline && pnpm test:coverage   # 22.77% · 14 tests
+git checkout bec33ea         && pnpm test:coverage   # 8 failing · 137 passing (red)
+git checkout main            && pnpm test:coverage   # 89.46% · 145 tests
+```
+
+Live API check: `curl -X POST https://zerocov.vercel.app/api/demo/flow` → `9/9 steps
+matched the documented status codes`. Expired-token check:
+`curl https://zerocov.vercel.app/api/demo/expired-token` then call `/api/auth/me` with
+the token → `401`, per `EXP-TOKEN-401`.
+
 ---
 
 ## Verified results
