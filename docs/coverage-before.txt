@@ -2,49 +2,49 @@ $ jest --coverage
 PASS tests/unit/utils/helpers.baseline.test.ts
   utils/helpers — baseline tests
     isValidEmail
-      ✓ accepts a valid email (2 ms)
+      ✓ accepts a valid email (1 ms)
       ✓ rejects missing @ symbol
-      ✓ rejects empty string
+      ✓ rejects empty string (1 ms)
     isNonEmptyString
       ✓ returns true for a non-empty string
       ✓ returns false for empty string
-      ✓ returns false for whitespace-only string (1 ms)
-      ✓ returns false for a number
+      ✓ returns false for whitespace-only string
+      ✓ returns false for a number (1 ms)
     formatAmount
       ✓ formats 1000 cents as $10.00
-      ✓ formats 0 cents as $0.00 (1 ms)
+      ✓ formats 0 cents as $0.00
     formatDateRange
       ✓ formats a date range correctly
     sanitizeString
-      ✓ trims whitespace (1 ms)
+      ✓ trims whitespace
       ✓ removes HTML angle brackets
     generateId
       ✓ generates a non-empty string (1 ms)
       ✓ generates unique IDs
 
-----------------------------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------
-File                                                            | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                     
-----------------------------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------
-All files                                                       |   22.77 |        5 |   10.46 |   25.36 |                                                       
- approvals/file:src/approvals         |   21.42 |        0 |       0 |   23.68 |                                                       
-  routes.ts                                                     |   21.42 |        0 |       0 |   23.68 | 11-21,26-28,33-45,53-77                               
- auth/file:src/auth                   |   28.57 |    13.33 |    7.69 |   28.57 |                                                       
-  middleware.ts                                                 |   19.04 |        0 |   33.33 |   19.04 | 20-34,44-52                                           
-  routes.ts                                                     |   23.07 |        0 |       0 |   23.07 | 13-33,38-55,63-77,84,89-93                            
-  tokens.ts                                                     |   55.55 |       40 |       0 |   55.55 | 10,14,18,22,26-32                                     
- expenses/file:src/expenses           |   17.56 |        0 |       0 |   20.96 |                                                       
-  routes.ts                                                     |   17.56 |        0 |       0 |   20.96 | 15-16,21-27,32-57,62-81,86-92,97-122,127-131          
- file:src                             |    8.33 |        0 |    3.44 |    10.2 |                                                       
-  db.ts                                                         |    8.33 |        0 |    3.44 |    10.2 | 25-140                                                
- notifications/file:src/notifications |   26.66 |        0 |    12.5 |   26.66 |                                                       
-  service.ts                                                    |   26.66 |        0 |    12.5 |   26.66 | 22-28,39-58                                           
- reports/file:src/reports             |   16.32 |        0 |       0 |   19.04 |                                                       
-  routes.ts                                                     |   16.32 |        0 |       0 |   19.04 | 11-12,17-22,27-90                                     
- utils/file:src/utils                 |   43.13 |    16.66 |      40 |   47.82 |                                                       
-  helpers.ts                                                    |   43.13 |    16.66 |      40 |   47.82 | 14-15,19-20,30-34,42-44,66-70,76-77,83-84,90-91,97-98 
-----------------------------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------
+------------------------------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------
+File                                                              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                     
+------------------------------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------
+All files                                                         |   22.77 |        5 |   10.46 |   25.36 |                                                       
+ src/approvals         |   21.42 |        0 |       0 |   23.68 |                                                       
+  routes.ts                                                       |   21.42 |        0 |       0 |   23.68 | 11-21,26-28,33-45,53-77                               
+ src/auth                   |   28.57 |    13.33 |    7.69 |   28.57 |                                                       
+  middleware.ts                                                   |   19.04 |        0 |   33.33 |   19.04 | 20-34,44-52                                           
+  routes.ts                                                       |   23.07 |        0 |       0 |   23.07 | 13-33,38-55,63-77,84,89-93                            
+  tokens.ts                                                       |   55.55 |       40 |       0 |   55.55 | 10,14,18,22,26-32                                     
+ src/expenses           |   17.56 |        0 |       0 |   20.96 |                                                       
+  routes.ts                                                       |   17.56 |        0 |       0 |   20.96 | 15-16,21-27,32-57,62-81,86-92,97-122,127-131          
+ src                             |    8.33 |        0 |    3.44 |    10.2 |                                                       
+  db.ts                                                           |    8.33 |        0 |    3.44 |    10.2 | 25-140                                                
+ src/notifications |   26.66 |        0 |    12.5 |   26.66 |                                                       
+  service.ts                                                      |   26.66 |        0 |    12.5 |   26.66 | 22-28,39-58                                           
+ src/reports             |   16.32 |        0 |       0 |   19.04 |                                                       
+  routes.ts                                                       |   16.32 |        0 |       0 |   19.04 | 11-12,17-22,27-90                                     
+ src/utils                 |   43.13 |    16.66 |      40 |   47.82 |                                                       
+  helpers.ts                                                      |   43.13 |    16.66 |      40 |   47.82 | 14-15,19-20,30-34,42-44,66-70,76-77,83-84,90-91,97-98 
+------------------------------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------
 Test Suites: 1 passed, 1 total
 Tests:       14 passed, 14 total
 Snapshots:   0 total
-Time:        1.713 s
+Time:        0.645 s, estimated 2 s
 Ran all test suites.

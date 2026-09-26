@@ -1,38 +1,38 @@
 $ jest --coverage
 PASS tests/unit/auth/tokens.test.ts
-PASS tests/unit/utils/helpers.baseline.test.ts (5.596 s)
-PASS tests/unit/utils/helpers.extended.test.ts (5.735 s)
-PASS tests/unit/auth/middleware.test.ts (6.144 s)
-PASS tests/unit/approvals/routes.test.ts (6.193 s)
-PASS tests/integration/expense-approval-flow.test.ts (6.213 s)
-PASS tests/unit/reports/routes.test.ts (6.202 s)
-PASS tests/unit/expenses/routes.test.ts (6.272 s)
-PASS tests/unit/auth/routes.test.ts (7.046 s)
------------------------------------------------------------------------|---------|----------|---------|---------|-------------------
-File                                                                   | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
------------------------------------------------------------------------|---------|----------|---------|---------|-------------------
-All files                                                              |   89.46 |    77.31 |      80 |   91.57 |                   
- approvals/file:/home/kiter/bob/expense-flow-api/src/approvals         |   97.61 |    86.66 |     100 |     100 |                   
-  routes.ts                                                            |   97.61 |    86.66 |     100 |     100 | 18,54             
- auth/file:/home/kiter/bob/expense-flow-api/src/auth                   |    95.6 |    73.33 |     100 |    95.6 |                   
-  middleware.ts                                                        |   90.47 |       80 |     100 |   90.47 | 48-49             
-  routes.ts                                                            |   96.15 |    86.66 |     100 |   96.15 | 72,91             
-  tokens.ts                                                            |     100 |       50 |     100 |     100 | 4-29              
- expenses/file:/home/kiter/bob/expense-flow-api/src/expenses           |   87.83 |    67.74 |   85.71 |   93.54 |                   
-  routes.ts                                                            |   87.83 |    67.74 |   85.71 |   93.54 | 73,127-131        
- file:/home/kiter/bob/expense-flow-api/src                             |   78.57 |    54.54 |   69.69 |   83.56 |                   
-  app.ts                                                               |      75 |        0 |      25 |      75 | 23,28,34-39       
-  db.ts                                                                |      80 |       60 |   75.86 |   87.75 | 41,72,96-99,115   
- notifications/file:/home/kiter/bob/expense-flow-api/src/notifications |   26.66 |        0 |    12.5 |   26.66 |                   
-  service.ts                                                           |   26.66 |        0 |    12.5 |   26.66 | 22-28,39-58       
- reports/file:/home/kiter/bob/expense-flow-api/src/reports             |     100 |      100 |     100 |     100 |                   
-  routes.ts                                                            |     100 |      100 |     100 |     100 |                   
- utils/file:/home/kiter/bob/expense-flow-api/src/utils                 |     100 |      100 |     100 |     100 |                   
-  helpers.ts                                                           |     100 |      100 |     100 |     100 |                   
------------------------------------------------------------------------|---------|----------|---------|---------|-------------------
+PASS tests/unit/utils/helpers.extended.test.ts
+PASS tests/unit/utils/helpers.baseline.test.ts
+PASS tests/unit/auth/middleware.test.ts
+PASS tests/integration/expense-approval-flow.test.ts
+PASS tests/unit/reports/routes.test.ts
+PASS tests/unit/approvals/routes.test.ts
+PASS tests/unit/expenses/routes.test.ts (5.005 s)
+PASS tests/unit/auth/routes.test.ts (5.767 s)
+------------------------------------------------------------------|---------|----------|---------|---------|-------------------
+File                                                              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+------------------------------------------------------------------|---------|----------|---------|---------|-------------------
+All files                                                         |   89.46 |    77.31 |      80 |   91.57 |                   
+ src/approvals         |   97.61 |    86.66 |     100 |     100 |                   
+  routes.ts                                                       |   97.61 |    86.66 |     100 |     100 | 18,54             
+ src/auth                   |    95.6 |    73.33 |     100 |    95.6 |                   
+  middleware.ts                                                   |   90.47 |       80 |     100 |   90.47 | 48-49             
+  routes.ts                                                       |   96.15 |    86.66 |     100 |   96.15 | 72,91             
+  tokens.ts                                                       |     100 |       50 |     100 |     100 | 4-29              
+ src/expenses           |   87.83 |    67.74 |   85.71 |   93.54 |                   
+  routes.ts                                                       |   87.83 |    67.74 |   85.71 |   93.54 | 73,127-131        
+ src                             |   78.57 |    54.54 |   69.69 |   83.56 |                   
+  app.ts                                                          |      75 |        0 |      25 |      75 | 23,28,34-39       
+  db.ts                                                           |      80 |       60 |   75.86 |   87.75 | 41,72,96-99,115   
+ src/notifications |   26.66 |        0 |    12.5 |   26.66 |                   
+  service.ts                                                      |   26.66 |        0 |    12.5 |   26.66 | 22-28,39-58       
+ src/reports             |     100 |      100 |     100 |     100 |                   
+  routes.ts                                                       |     100 |      100 |     100 |     100 |                   
+ src/utils                 |     100 |      100 |     100 |     100 |                   
+  helpers.ts                                                      |     100 |      100 |     100 |     100 |                   
+------------------------------------------------------------------|---------|----------|---------|---------|-------------------
 
 Test Suites: 9 passed, 9 total
 Tests:       145 passed, 145 total
 Snapshots:   0 total
-Time:        7.648 s
+Time:        6.258 s
 Ran all test suites.
